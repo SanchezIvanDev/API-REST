@@ -26,4 +26,32 @@ public class My_Rest_Controller {
         return repository.save(nuevaTarea);
 
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Tarea>getTareaById(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(tarea -> ResponseEntity.ok(tarea))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarTarea(@PathVariable Long id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Tarea> actualizarTarea(@PathVariable Long id, @RequestBody Tarea tareaDetalles) {
+        return repository.findById(id)
+                .map(tareaExistente -> {
+                    tareaExistente.setDescripcion(tareaDetalles.getDescripcion());
+                    tareaExistente.setCompletada(tareaDetalles.isCompletada());
+                    Tarea actualizada = repository.save(tareaExistente);
+                    return ResponseEntity.ok(actualizada);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

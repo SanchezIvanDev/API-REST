@@ -1,0 +1,14 @@
+$kind: http-request
+name: http://localhost:8080/api/tareas
+url: http://localhost:8080/api/tareas
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"descripcion\": \"Primera tarea desde el API\",\r
+
+    \  \"completada\": false\r
+
+    }"
+order: 1772466925612
