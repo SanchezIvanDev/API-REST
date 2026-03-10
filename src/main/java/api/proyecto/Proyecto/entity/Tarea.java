@@ -1,5 +1,7 @@
 package api.proyecto.Proyecto.entity;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,6 +9,8 @@ public class Tarea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank(message = "La descripción no puede estar vacía")
     private String descripcion;
     private boolean completada;
 
@@ -34,8 +38,8 @@ public class Tarea {
             return completada;
     }
 
-    public void setCompletada(boolean compleatada) {
-            this.completada = compleatada;
+    public void setCompletada(boolean completada) {
+            this.completada = completada;
     }
 
 

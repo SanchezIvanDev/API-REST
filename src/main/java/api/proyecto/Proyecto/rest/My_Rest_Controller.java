@@ -2,6 +2,7 @@ package api.proyecto.Proyecto.rest;
 
 import api.proyecto.Proyecto.entity.Tarea;
 import api.proyecto.Proyecto.service.TareaService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -30,7 +31,7 @@ public class My_Rest_Controller {
     }
 
     @PostMapping
-    public Tarea crear (@RequestBody Tarea tarea) {
+    public Tarea crear (@Valid @RequestBody Tarea tarea) {
         return service.guardar(tarea);
 
     }
@@ -44,7 +45,7 @@ public class My_Rest_Controller {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tarea> actualizarTarea(@PathVariable Long id, @RequestBody Tarea detalles) {
+    public ResponseEntity<Tarea> actualizarTarea(@PathVariable Long id,@Valid @RequestBody Tarea detalles) {
         return service.buscarPorId(id)
                 .map(tareaExistente -> {
                     tareaExistente.setDescripcion(detalles.getDescripcion());
