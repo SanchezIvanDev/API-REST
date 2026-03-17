@@ -52,42 +52,88 @@
 </div>
 
 <script>
-    function cargarTareas() {
-        fetch('/api/tareas')
-            .then(response => response.json())
-            .then(tareas => {
-                const contenedor = document.getElementById('listaTareas');
-                contenedor.innerHTML = '';
-                tareas.forEach(tarea => {
-                    const div = document.createElement('div');
-                    div.className = 'tarea-card';
-                    div.innerHTML = `
-                        <strong>${tarea.descripcion}</strong>
-                        <div class="fecha">Creada el: ${new Date(tarea.fechaCreacion).toLocaleString()}</div>
-                    `;
-                    contenedor.appendChild(div);
-                });
+    const contenedorTareas = document.getElementById('listaTareas');
+    const inputNuevaTarea = document.getElementById('inputTarea');
+
+    const api = {
+        async fetchAll() {
+            const res = await fetch('/api/tareas');
+            return res.json();
+        },
+        async delete(id) {
+            return fetch(`/api/tareas/${id}`, { method: 'DELETE' });
+        },
+        async create(descripcion) {
+            return fetch('/api/tareas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ descripcion, completada: false })
             });
+        }
+    };
+
+    function crearPlantillaTarea(tarea) {
+        const fecha = new Date(tarea.fechaCreacion).toLocaleString();
+
+        const div = document.createElement('div');
+        div.className = 'tarea-card';
+        div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>${tarea.descripcion}</strong>
+                    <div class="fecha">Creada el: ${fecha}</div>
+                </div>
+                <button class="btn-eliminar" data-id="${tarea.id}">Eliminar</button>
+            </div>
+        `;
+
+        div.querySelector('.btn-eliminar').onclick = () => borrarTarea(tarea.id);
+
+        return div;
     }
 
-    function agregarTarea() {
-        const desc = document.getElementById('inputTarea').value;
-
-        fetch('/api/tareas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ descripcion: desc, completada: false })
-        })
-        .then(response => {
-            if(response.ok) {
-                document.getElementById('inputTarea').value = '';
-                cargarTareas();
-            } else {
-                alert("Error: ¿Quizás dejaste el campo vacío?");
-            }
-        });
+    async function cargarTareas() {
+        try {
+            const tareas = await api.fetchAll();
+            contenedorTareas.innerHTML = '';
+            tareas.forEach(tarea => {
+                contenedorTareas.appendChild(crearPlantillaTarea(tarea));
+            });
+        } catch (error) {
+            console.error("Error al cargar tareas:", error);
+        }
     }
-    cargarTareas();
+
+    async function agregarTarea() {
+        const descripcion = inputNuevaTarea.value.trim();
+
+        if (!descripcion) {
+            alert("Por favor, escribe una descripción");
+            return;
+        }
+
+        const response = await api.create(descripcion);
+
+        if (response.ok) {
+            inputNuevaTarea.value = '';
+            cargarTareas();
+        } else {
+            alert("Error al guardar la tarea");
+        }
+    }
+
+    async function borrarTarea(id) {
+        if (!confirm("¿Seguro que quieres eliminar esta tarea?")) return;
+
+        const response = await api.delete(id);
+        if (response.ok) {
+            cargarTareas();
+        } else {
+            alert("No se pudo eliminar la tarea");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarTareas);
 </script>
 </body>
 </html>
